@@ -1,0 +1,24 @@
+    // "sass-loader": "6.0.3",
+      //"node-sass": "4.5.0",
+
+a downgrade was required ->  npm install npm@5.3 -g
+
+
+npm install -g npm-check
+      npm-check
+
+
+
+a express midleware always recieve 3 params (req,res,next) and alwyay youu should put next() to advanced when you finish your midleware
+
+exports.myMidleware = (requ,res,next)=>{
+      .................
+      next()
+}
+
+you can use it when you put enside a fucntion:
+      router.get('/', myMidleware, homepage)
+
+
+
+app.use means that we are using global midleware
