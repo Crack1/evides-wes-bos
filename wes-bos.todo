@@ -22,3 +22,5 @@ you can use it when you put enside a fucntion:
 
 
 app.use means that we are using global midleware
+
+mongoose.Promise = global.Promise we tell to mongo use the global promises, and this mean use the native system of promises, we can use other like blue bird
