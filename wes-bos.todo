@@ -31,3 +31,23 @@ res.locals
       Also, one can set res.mydata or req.mydata properties too?
 
       In theory, app.locals can also be used for passing this data along through the different middleware as it will persist across middlewares but that would be contrary to the conventional use of app.locals. It is used more for application specific data. It will also be necessary to clear that data at the end of the request-response cycle so the same variables can be used for the next request.
+
+
+By default, all attributes are escaped—that is,special characters are replaced with escape sequences—to prevent attacks (such as cross site scripting). If you need to use special characters, use != instead of =.
+
+div(escaped="<code>")  === <div escaped="&lt;code&gt;"></div>
+div(unescaped!="<code>") === <div unescaped="<code>"></div>
+
+
+///what bodyParser.urlencoded({ extended: true }) does? allow us to use inputs that has nested data: exaple location[address]
+
+
+  // if someone hits enter on the address field, dont submit the form
+  input.on('keyboard', (e) => {
+    if (e.keycode === 13) e.preventDefault()
+  })
+
+
+  AIzaSyAxN0sU9fM_yxcDD9nAkWMa-XBlKddbKqE
+
+  buffer is the representation of a file in memory
