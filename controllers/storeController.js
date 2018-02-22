@@ -86,7 +86,7 @@ exports.updateStore = async (req, res) => {
     new: true, //return the new store instead of the old one
     runValidators: true
   }).exec()
-  req.flash('success', `Successfully updated <strong>${store.name}</strong>. <a href="/store/${store.slug}">View Store -></a> `)
+  req.flash('success', `Successfully updated <strong>${store.name}</strong>. <a href="/store /${store.slug}">View Store -></a> `)
   res.redirect(`/stores/${store._id}/edit`)
 }
 
@@ -100,4 +100,24 @@ exports.getStoreBySlug = async (req, res, next) => {
     title: store.name
   })
 
+}
+
+exports.getStoresByTag = async (req, res) => {
+
+  const tag = req.params.tag
+  const tagQuery = tag || {
+    $exists: true
+  }
+  const tagsPromise = Store.getTagsList()
+  const storesPromise = Store.find({
+    tags: tagQuery
+  })
+  const [tags, stores] = await Promise.all([tagsPromise, storesPromise])
+
+  res.render('tags', {
+    tags,
+    title: 'Tags',
+    tags,
+    stores
+  })
 }

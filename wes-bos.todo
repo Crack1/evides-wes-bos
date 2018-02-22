@@ -51,3 +51,32 @@ div(unescaped!="<code>") === <div unescaped="<code>"></div>
   AIzaSyAxN0sU9fM_yxcDD9nAkWMa-XBlKddbKqE
 
   buffer is the representation of a file in memory
+
+  aggregation is the hability to do certain complex queries where you need to do multiple steps, an agreggation is a simple array where we are passing multiple commands  
+
+
+
+
+With Promise.all() we can wait for many promises
+
+  const tag = req.params.tag
+  const tagsPromise = Store.getTagsList()
+  const storesPromise = Store.find({
+    tags: tag
+  })
+  const [tags, stores] = await Promise.all([tagsPromise, storesPromise])
+
+if the first query dont return any store that has any tag property on it
+
+  const tagQuery = tag || {
+      $exists: true
+    }
+    const tagsPromise = Store.getTagsList()
+    const storesPromise = Store.find({
+      tags: tagQuery
+    })
+
+    //orinally User.register() return a callback but using promisify we can return a promise,  you need to especicfy two params, the methot to promisify and the object to realize the binding
+    const register = promisify(User.register.bind(User))
+
+    $gt: Date.now() mayor que 
