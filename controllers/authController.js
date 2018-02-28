@@ -5,6 +5,8 @@ const crypto = require('crypto')
 const {
   promisify
 } = require('es6-promisify')
+const mail = require('../handlers/mail')
+
 exports.login = passport.authenticate('local', {
   failureRedirect: '/login',
   failureFlash: 'Failed Login',
@@ -36,8 +38,15 @@ exports.forgot = async (req, res) => {
   user.resetPasswordToken = crypto.randomBytes(20).toString('hex')
   user.resetPasswordExpires = Date.now() + 360000
   await user.save()
-  const resetUrl = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`
-  req.flash('success', `You have been emailed a password reset link. ${resetUrl}`)
+  const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`
+
+  await mail.send({
+    user,
+    filename: 'password-reset',
+    subject: 'Password Reset',
+    resetURL
+  })
+  req.flash('success', `You have been emailed a password reset link.`)
   res.redirect('/login')
 }
 

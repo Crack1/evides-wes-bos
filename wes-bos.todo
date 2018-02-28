@@ -80,3 +80,19 @@ if the first query dont return any store that has any tag property on it
     const register = promisify(User.register.bind(User))
 
     $gt: Date.now() mayor que 
+
+when we want execute complex queries (index as text) we can use the $text operator that perform text search in any field indexed like text
+        const stores = await Store.find({
+            $text: {
+              $search: req.query.q
+            },
+            score: {
+              $meta: 'textScore'
+            }
+
+          }).sort({
+            score: {
+              $meta: 'textScore'
+            }
+          })
+
