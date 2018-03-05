@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Store = mongoose.model('Store')
+const User = mongoose.model('User')
 const multer = require('multer') //is a midleware used to upload files
 const jimp = require('jimp') //allow resize images
 const uuid = require('uuid')
@@ -58,10 +59,34 @@ exports.createStore = async (req, res) => {
 
 }
 exports.getStores = async (req, res) => {
-  const stores = await Store.find()
+  const page = req.params.page || 1
+  const limit = 5
+  const skip = (page * limit) - limit
+
+  const storesPromise = Store.find()
+    .skip(skip)
+    .limit(limit)
+    .sort({
+      created: 'desc'
+    })
+
+  const countPromise = Store.count()
+  const [stores, count] = await Promise.all([storesPromise, countPromise])
+  const pages = Math.ceil(count / limit)
+
+  if (!stores.length && skip) {
+    req.flash('info', `Hey! You asked for page ${page}. But that doesn't exist. So I put you on page ${pages}`)
+    res.redirect(`/stores/page/${pages}`)
+    return
+  }
+
+
   res.render('stores', {
     title: 'Stores',
-    stores: stores
+    stores,
+    page,
+    pages,
+    count
   })
 }
 
@@ -102,7 +127,7 @@ exports.updateStore = async (req, res) => {
 exports.getStoreBySlug = async (req, res, next) => {
   const store = await Store.findOne({
     slug: req.params.slug
-  }).populate('author')
+  }).populate('author reviews')
   if (!store) return next()
   res.render('store', {
     store,
@@ -146,5 +171,62 @@ exports.searchStores = async (req, res) => {
     }
   })
   res.json(stores)
+}
+
+exports.mapStores = async (req, res) => {
+  const coordinates = [req.query.lng, req.query.lat].map(parseFloat)
+  const q = {
+    "location": {
+      "$near": {
+        "$geometry": {
+          "type": 'Point',
+          coordinates
+        },
+        "$maxDistance": 10000000
+      }
+    }
+  }
+  const stores = await Store.find(q).select('slug name description location')
+  res.json(stores)
+}
+exports.mapPage = (req, res) => {
+  res.render('map', {
+    title: 'Map'
+  })
+}
+
+exports.heartStores = async (req, res) => {
+  const hearts = req.user.hearts.map(obj => obj.toString())
+  const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet'
+  const user = await User.findByIdAndUpdate(req.user._id, {
+    //the below value can be $pull or $addToSet but how we put it in a variable we can use [operator]
+    [operator]: {
+      hearts: req.params.id
+    }
+  }, {
+    new: true
+  })
+  res.json(user)
+}
+
+exports.getHearts = async (req, res) => {
+  const stores = await Store.find({
+    _id: {
+      $in: req.user.hearts
+    }
+  })
+
+  res.render('stores', {
+    title: 'Hearted Stores',
+    stores
+  })
+}
+
+exports.getTopStores = async (req, res) => {
+  const stores = await Store.getTopStores()
+  res.render('topStores', {
+    stores,
+    title: 'Top Stores'
+  })
 
 }
